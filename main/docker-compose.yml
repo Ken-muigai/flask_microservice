@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: 'python main.py 0.0.0.0:8001' # command to run on container start
+    ports:
+      - "8001:5000"
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: "python consumer.py"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:10.5
+    restart: always
+    environment:
+      POSTGRES_DATABASE: 'myuser'
+      POSTGRES_USER: 'myuser'
+      POSTGRES_PASSWORD: 'myuser'
+      HOST: "localhost"
+    volumes:
+      - .datadb:/var/lib/postgresql/data
+    ports:
+      - "5440:5432"
+
