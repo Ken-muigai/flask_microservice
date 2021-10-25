@@ -1,4 +1,6 @@
-import pika
+import pika, json
+
+from main.main import Product, db
 
 params = pika.URLParameters("amqps://vfchomdw:1a3bInD6To-Z7MOlDXamu0u8cbY3hYkR@hornet.rmq.cloudamqp.com/vfchomdw")
 
@@ -11,7 +13,22 @@ channel.queue_declare(queue="main")
 
 def callback(channel, method, properties, body):
     print("Received in main")
-    print(body)
+    data = json.loads(body)
+    print(data)
+
+    if properties.content_type == "Product added":
+        product = Product(id=data["id"], title=data["name"], image=data["image"])
+        db.session.add(product)
+        db.session.commit()
+    elif properties.content_type == "Product Updated":
+        product = Product.query.get(id=data["id"])
+        product.title = data["name"]
+        product.image = data["image"]
+        db.session.commit()
+    elif properties.content_type == "Product Destroyed":
+        product = Product.query.get(id=data["id"])
+        db.session.delete(product)
+        db.session.commit()
 
 
 channel.basic_consume(queue="main", on_message_callback=callback, auto_ack=False)
