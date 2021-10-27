@@ -4,7 +4,7 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from sqlalchemy import UniqueConstraint
-
+import requests
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://myuser:myuser@db/myuser"
 CORS(app)
@@ -33,6 +33,31 @@ class ProductUser(db.Model):
 @app.route("/api/products")
 def index():
     return jsonify(Product.query.all())
+
+
+
+@app.route("/api/products/<int:id>/like", methods=["POST"])
+def like(id):
+    req = requests.get("http://docker.for.linux.localhost:8000/api/user")
+    return jsonify(req)
+
+
+
+
+
+
+
+
+
+
+
+
+# @app.route("/api/delete/")
+# def destroyer():
+#     products = Product.query.delete()
+#     db.session.delete(products)
+#     db.session.commit()
+#     return "Deleted"
 
 
 if __name__ == "__main__":

@@ -23,12 +23,13 @@ def callback(ch, method, properties, body):
         db.session.add(product)
         db.session.commit()
     elif properties.content_type == "Product Updated":
-        product = Product.query.get(id=data["id"])
+        product = Product.query.get(data["id"])
         product.title = data["name"]
         product.image = data["image"]
         db.session.commit()
+        print("product updated")
     elif properties.content_type == "Product Destroyed":
-        product = Product.query.get(id=data["id"])
+        product = Product.query.get(data)
         db.session.delete(product)
         db.session.commit()
 
