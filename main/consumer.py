@@ -9,7 +9,7 @@ connection = pika.BlockingConnection(params)
 
 channel = connection.channel()
 
-channel.queue_declare(queue="main")
+channel.queue_declare(queue="main", durable=False, auto_delete=False)
 
 
 def callback(ch, method, properties, body):
@@ -19,12 +19,12 @@ def callback(ch, method, properties, body):
     print(data)
 
     if properties.content_type == "Product Added":
-        product = Product(id=data["id"], title=data["name"], image=data["image"])
+        product = Product(id=data["id"], title=data["title"], image=data["image"], likes=data["likes"])
         db.session.add(product)
         db.session.commit()
     elif properties.content_type == "Product Updated":
         product = Product.query.get(data["id"])
-        product.title = data["name"]
+        product.title = data["title"]
         product.image = data["image"]
         db.session.commit()
         print("product updated")
@@ -35,7 +35,6 @@ def callback(ch, method, properties, body):
 
 
 
-channel.basic_consume(queue="main", on_message_callback=callback, auto_ack=False)
+channel.basic_consume(queue="main", on_message_callback=callback, auto_ack=True)
 channel.start_consuming()
 channel.close()
-
